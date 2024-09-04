@@ -25,7 +25,7 @@ server.listen(8088, ()=>{
     console.log('Server running on http://localhost:8088/')
 });
 
-const uri="mongodb+srv://med:med@cluster0.cg38vv7.mongodb.net/?retryWrites=true&w=majority";
+const uri="mongodb+srv://ghazel:T1Lz7SLIRkmS6gBs@freenety.x1peqf4.mongodb.net/?retryWrites=true&w=majority&appName=freenety";
 mongoose.Promise =Promise;
 mongoose.connect(uri);
 mongoose.connection.on('error',(error:Error)=> console.log('hhhhhhhhhhhhhhhh',error));

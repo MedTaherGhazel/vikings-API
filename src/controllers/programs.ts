@@ -47,29 +47,97 @@ export const getAllPrograms = async (req: express.Request, res: express.Response
     }
 }
 
-export const addProgram = async (req: express.Request, res: express.Response) => {
+export const addWorkoutProgram = async (req: express.Request, res: express.Response) => {
     try {
-        const { name, desc, image } = req.body;
+        const { name, desc, image, nbOfWeeks, weeks } = req.body;
 
-        if (!name || !desc || !image) {
+        if (!name || !desc || !image || !weeks || !nbOfWeeks) {
             console.log('Required fields missing');
             return res.sendStatus(400); // Bad Request
         }
 
         const existingProgram = await getProgramByName(name);
-
         if (existingProgram) {
             console.log('Program already exists');
             return res.sendStatus(409); // Conflict
         }
 
-        const newProgram = await createProgram({ name, desc, image });
+        // Repeat the weeks array nbOfWeeks times
+        const repeatedWeeks = Array.from({ length: nbOfWeeks }, () => weeks).flat();
+
+        // Creating a workout program
+        const newProgram = await createProgram({
+            isMeal: false,
+            name,
+            desc,
+            image,
+            nbOfWeeks,
+            weeks: repeatedWeeks,
+        });
+
         return res.status(201).json(newProgram); // Created
     } catch (error) {
-        console.log('Error adding program', error);
-        return res.sendStatus(500);
+        console.error('Error adding workout program', error);
+        return res.sendStatus(500); // Internal Server Error
     }
-}
+};
+export const addMealProgram = async (req: express.Request, res: express.Response) => {
+    try {
+        const { name, desc, image, nbOfWeeks, weeks } = req.body;
+
+        if (!name || !desc || !image || !weeks || !nbOfWeeks) {
+            console.log('Required fields missing');
+            return res.sendStatus(400); // Bad Request
+        }
+
+        const existingProgram = await getProgramByName(name);
+        if (existingProgram) {
+            console.log('Program already exists');
+            return res.sendStatus(409); // Conflict
+        }
+
+        // Repeat the weeks array nbOfWeeks times
+        const repeatedWeeks = Array.from({ length: nbOfWeeks }, () => weeks).flat();
+
+        // Creating a meal program
+        const newProgram = await createProgram({
+            isMeal: true,
+            name,
+            desc,
+            image,
+            nbOfWeeks,
+            weeks: repeatedWeeks,
+        });
+
+        return res.status(201).json(newProgram); // Created
+    } catch (error) {
+        console.error('Error adding meal program', error);
+        return res.sendStatus(500); // Internal Server Error
+    }
+};
+
+export const getMeals = async (req: express.Request, res: express.Response) => {
+    try {
+        const programs = await getPrograms(); // Fetch all programs
+        const meals = programs.filter(program => program.isMeal); // Filter meals
+        return res.status(200).json(meals);
+    } catch (error) {
+        console.error('Error getting meals', error);
+        return res.sendStatus(500); // Internal Server Error
+    }
+};
+
+export const getWorkouts = async (req: express.Request, res: express.Response) => {
+    try {
+        const programs = await getPrograms(); // Fetch all programs
+        const workouts = programs.filter(program => !program.isMeal); // Filter workouts
+        return res.status(200).json(workouts);
+    } catch (error) {
+        console.error('Error getting workouts', error);
+        return res.sendStatus(500); // Internal Server Error
+    }
+};
+
 
 export const getProgram = async (req: express.Request, res: express.Response) => {
     try {
